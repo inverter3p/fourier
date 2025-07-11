@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Fourier Series Explorer</title>
+
+    <!-- Google Fonts: Roboto for Material Design -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Google Material Symbols (Icon Font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #1976D2; /* A classic Material Blue */
+            --primary-dark-color: #1565C0;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .card-header h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .card-header .material-symbols-outlined {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        .card p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin: 0 0 32px 0;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-button:hover {
+            background-color: var(--primary-dark-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .cta-button .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="card-header">
+            <!-- Icon representing graphs or signals -->
+            <span class="material-symbols-outlined">
+                multiline_chart
+            </span>
+            <h1>Fourier Series Explorer</h1>
+        </div>
+        <p>
+            An interactive web application to visualize Fourier Series. Draw your own waveforms, plot data points, or use presets to see signal reconstruction in real-time.
+        </p>
+        <a href="https://inverter3p.github.io/fourier/fourier.html" class="cta-button">
+            Launch Explorer
+            <!-- Icon indicating an external link or launch action -->
+            <span class="material-symbols-outlined">
+                launch
+            </span>
+        </a>
+    </div>
+
+</body>
+</html>
