@@ -2,11 +2,10 @@
 
 An intuitive, web-based tool for exploring the fascinating world of Fourier Series. This application allows users to visualize how complex periodic waveforms can be decomposed into a sum of simple sine and cosine waves. It's built with vanilla JavaScript, HTML, and CSS, and runs entirely in a single, self-contained file.
 
-### [➡️ Try the Live Demo!](https://your-github-username.github.io/your-repo-name/)
-*(You'll need to set up GitHub Pages for this link to work)*
+### [➡️ Try the Live Demo!](https://inverter3p.github.io/fourier/)
 
-![Screenshot of the Interactive Fourier Series Explorer](https://user-images.githubusercontent.com/.../your-screenshot.png)
-*(Replace this with a screenshot of your application)*
+
+![fourier](https://github.com/user-attachments/assets/9d6355f0-de9d-42df-8db0-c0ff2ca6110c)
 
 ---
 
@@ -19,11 +18,6 @@ An intuitive, web-based tool for exploring the fascinating world of Fourier Seri
 *   📊 **Frequency Spectrum Visualization:** View the magnitude of the Fourier coefficients for your signal, clearly distinguishing the DC component and the harmonic amplitudes.
 *   🔍 **Unclipped Auto-Scaling:** When Gibbs phenomenon causes clipping, a dedicated modal window opens to show the waveform in its full, unclipped range.
 *   ⚙️ **Interactive Modal:** The auto-scale window has its own synchronized harmonics slider, allowing for detailed analysis of ringing and convergence.
-*   🧠 **Smart Axis Handling:**
-    *   The axes auto-expand to fit points plotted from the text area.
-    *   The tool provides warnings if the period (X-Max) is shortened, truncating the data.
-    *   Extending the period automatically fills the new range, preserving the wave's shape.
-*   📦 **Zero-Dependency, Single File:** The entire application is contained in one `index.html` file. No builds, no dependencies. Just open it in a browser.
 
 ---
 
@@ -31,7 +25,7 @@ An intuitive, web-based tool for exploring the fascinating world of Fourier Seri
 
 ### As a User
 There are two easy ways to run the explorer:
-1.  **Click the [Live Demo link](https://your-github-username.github.io/your-repo-name/) above.**
+1.  **Click the [Live Demo link]([https://your-github-username.github.io/your-repo-name/](https://inverter3p.github.io/fourier/) above.**
 2.  Alternatively, download the `index.html` file from this repository and open it in your favorite web browser (like Chrome, Firefox, or Edge).
 
 ### As a Developer
@@ -53,15 +47,7 @@ The project is intentionally simple to modify:
 
 ---
 
-## Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/your-github-username/your-repo-name/issues) or submit a pull request.
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
 
 ---
 
