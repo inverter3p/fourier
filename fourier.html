@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Fourier Series Explorer v12</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #1e1e1e; color: #d4d4d4; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
+        h1 { color: #569cd6; margin-bottom: 5px; }
+        p { margin-top: 0; margin-bottom: 20px; color: #9cdcfe; max-width: 800px; text-align: center; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; }
+        .canvas-container { display: flex; flex-direction: column; align-items: center; background-color: #252526; border-radius: 8px; padding: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .canvas-header { display: flex; justify-content: space-between; align-items: center; width: 400px; }
+        h3 { margin: 0 0 10px 0; font-weight: 500; }
+        canvas { background-color: #0c0c0c; border: 1px solid #3e3e42; cursor: crosshair; border-radius: 4px; }
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; background-color: #252526; padding: 20px; border-radius: 8px; width: 820px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .row { display: flex; gap: 20px; width: 100%; align-items: center; }
+        .slider-group { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .input-group { display: flex; align-items: center; gap: 5px; }
+        label { white-space: nowrap; }
+        #pointInfo { font-size: 14px; color: #9cdcfe; align-self: flex-start; transition: color 0.3s; }
+        #pointInfo.warning { color: #f44747; }
+        input[type="range"] { width: 100%; cursor: pointer; }
+        input[type="number"] { width: 80px; background-color: #3c3c3c; color: #d4d4d4; border: 1px solid #3e3e42; border-radius: 4px; padding: 5px; text-align: center; }
+        button { background-color: #569cd6; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: #408ac9; }
+        #autoScaleButton { padding: 4px 8px; font-size: 13px; background-color: #ce9178; }
+        #autoScaleButton:hover { background-color: #d16940; }
+        .preset-buttons { display: flex; gap: 10px; }
+        .point-input-container { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        textarea { width: calc(100% - 20px); height: 100px; background-color: #3c3c3c; color: #d4d4d4; border: 1px solid #3e3e42; border-radius: 4px; padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: 14px; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
+        .modal-content { background-color: #252526; padding: 20px; border: 1px solid #3e3e42; border-radius: 8px; width: 840px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; position: relative; }
+        .close-button { color: #aaaaaa; position: absolute; top: 5px; right: 15px; font-size: 28px; font-weight: bold; }
+        .close-button:hover, .close-button:focus { color: #fff; text-decoration: none; cursor: pointer; }
+        #autoScaleCanvas { background-color: #0c0c0c; border: 1px solid #3e3e42; border-radius: 4px; margin-top: 10px; }
+        .modal-content .slider-group { padding: 10px 20px; box-sizing: border-box; } /* NEW: Style for modal slider */
+    </style>
+</head>
+<body>
+    <h1>Interactive Fourier Series Explorer</h1>
+    <p>Draw your waveform, plot x,y data points, or use presets to instantly see the signal reconstruction and frequency spectrum.</p>
+    <div class="container">
+        <div class="canvas-container"><h3>Draw Periodic Waveform</h3><canvas id="drawingCanvas" width="400" height="200"></canvas></div>
+        <div class="canvas-container">
+            <div class="canvas-header"><h3>Reconstructed Wave</h3><button id="autoScaleButton" style="display:none;">Auto-scale</button></div>
+            <canvas id="reconstructionCanvas" width="400" height="200"></canvas>
+        </div>
+        <div class="canvas-container"><h3>Frequency Spectrum (up to 100th order)</h3><canvas id="spectrumCanvas" width="820" height="200"></canvas></div>
+    </div>
+    <div class="controls">
+        <div class="row">
+            <div class="input-group"><label for="xMaxInput">X-Max (1 Period):</label><input type="number" id="xMaxInput" value="400" step="any"></div>
+            <div class="input-group"><label for="yMaxInput">Y-Max:</label><input type="number" id="yMaxInput" value="100" step="any"></div>
+            <div class="preset-buttons">
+                <button id="presetSquare">Square</button><button id="presetTriangle">Triangle</button><button id="presetSawtooth">Sawtooth</button>
+            </div>
+        </div>
+         <div class="slider-group"><label for="harmonicsSlider">Harmonics:</label><input type="range" id="harmonicsSlider" min="1" max="100" value="1"><span id="harmonicsValue">1</span></div>
+        <div class="slider-group"><label for="epsilonSlider">Point Extraction ε:</label><input type="number" id="epsilonSlider" min="0.2" max="1" value="0.4" step="0.2"><span id="epsilonValue"></span></div>
+        <div class="point-input-container">
+            <label for="pointInput">Enter Coordinates:</label><span id="pointInfo"></span>
+            <textarea id="pointInput"></textarea>
+            <button id="plotPointsButton">Plot from Points</button>
+        </div>
+        <button id="clearButton">Clear All</button>
+    </div>
+    
+    <!-- Modal for Auto-scaling -->
+    <div id="autoScaleModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="modalCloseButton">&times;</span>
+            <h3>Auto-scaled Reconstructed Wave</h3>
+            <!-- NEW: Added slider to the modal -->
+            
+            <canvas id="autoScaleCanvas" width="800" height="400"></canvas>
+            <div class="slider-group">
+                <label for="modalHarmonicsSlider">Harmonics:</label>
+                <input type="range" id="modalHarmonicsSlider" min="1" max="100" value="1">
+                <span id="modalHarmonicsValue">1</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dom = {
+                drawingCanvas: document.getElementById('drawingCanvas'), reconCanvas: document.getElementById('reconstructionCanvas'), spectrumCanvas: document.getElementById('spectrumCanvas'),
+                harmonicsSlider: document.getElementById('harmonicsSlider'), harmonicsValue: document.getElementById('harmonicsValue'), epsilonSlider: document.getElementById('epsilonSlider'), epsilonValue: document.getElementById('epsilonValue'),
+                clearButton: document.getElementById('clearButton'), pointInput: document.getElementById('pointInput'), pointInfo: document.getElementById('pointInfo'), plotPointsButton: document.getElementById('plotPointsButton'),
+                xMaxInput: document.getElementById('xMaxInput'), yMaxInput: document.getElementById('yMaxInput'),
+                presetSquare: document.getElementById('presetSquare'), presetTriangle: document.getElementById('presetTriangle'), presetSawtooth: document.getElementById('presetSawtooth'),
+                autoScaleButton: document.getElementById('autoScaleButton'), autoScaleModal: document.getElementById('autoScaleModal'), autoScaleCanvas: document.getElementById('autoScaleCanvas'), modalCloseButton: document.getElementById('modalCloseButton'),
+                // NEW: DOM elements for the modal's slider
+                modalHarmonicsSlider: document.getElementById('modalHarmonicsSlider'),
+                modalHarmonicsValue: document.getElementById('modalHarmonicsValue'),
+            };
+
+            const d_ctx = dom.drawingCanvas.getContext('2d'), r_ctx = dom.reconCanvas.getContext('2d'), s_ctx = dom.spectrumCanvas.getContext('2d');
+            const WIDTH = dom.drawingCanvas.width, HEIGHT = dom.drawingCanvas.height, MAX_HARMONICS = 100;
+
+            let isDrawing = false, lastMousePos = { x: 0, y: 0 };
+            let points = new Array(WIDTH).fill(HEIGHT / 2);
+            let fourierCoeffs = [], lastReconData = [];
+            
+            function getAxisLimits() { return { xMax: parseFloat(dom.xMaxInput.value) || WIDTH, yMax: parseFloat(dom.yMaxInput.value) || HEIGHT / 2 }; }
+            function userToCanvas(userPoint) { const { xMax, yMax } = getAxisLimits(); const canvasX = (userPoint.x / xMax) * WIDTH; const canvasY = HEIGHT / 2 - (userPoint.y / yMax) * (HEIGHT / 2); return { x: canvasX, y: canvasY }; }
+            function canvasToUser(canvasPoint) { const { xMax, yMax } = getAxisLimits(); const userX = (canvasPoint.x / WIDTH) * xMax; const userY = ((HEIGHT / 2) - canvasPoint.y) / (HEIGHT / 2) * yMax; return { x: userX, y: userY }; }
+            function getMousePos(canvas, evt) { const rect = canvas.getBoundingClientRect(); return { x: Math.round(evt.clientX - rect.left), y: Math.round(evt.clientY - rect.top) }; }
+
+            function plotFromText() {
+                clearPoints();
+                const text = dom.pointInput.value.trim();
+                const lines = text.split('\n');
+                let userPoints = [];
+                lines.forEach(line => { const parts = line.split(','); if (parts.length === 2) { const userX = parseFloat(parts[0].trim()), userY = parseFloat(parts[1].trim()); if (!isNaN(userX) && !isNaN(userY)) { userPoints.push({ x: userX, y: userY }); } } });
+                if (userPoints.length < 2) return;
+                userPoints.sort((a, b) => a.x - b.x);
+                let requiredXMax = Math.max(...userPoints.map(p => p.x)), requiredYMax = Math.max(...userPoints.map(p => Math.abs(p.y)));
+                if (requiredXMax > dom.xMaxInput.value) { dom.xMaxInput.value = requiredXMax; }
+                if (requiredYMax > dom.yMaxInput.value) { dom.yMaxInput.value = requiredYMax; }
+                const canvasPoints = userPoints.map(p => userToCanvas(p));
+                canvasPoints.sort((a, b) => a.x - b.x);
+                for (let i = 0; i < canvasPoints.length - 1; i++) { const p1 = canvasPoints[i], p2 = canvasPoints[i+1], dx = p2.x - p1.x, dy = p2.y - p1.y; for(let x = Math.floor(p1.x); x <= Math.ceil(p2.x); x++) { if (x >= 0 && x < WIDTH) { points[x] = (dx === 0) ? p1.y : p1.y + dy * (x - p1.x) / dx; } } }
+                const lastPlottedX = Math.min(WIDTH - 1, Math.ceil(canvasPoints[canvasPoints.length - 1].x));
+                if (lastPlottedX >= 0 && lastPlottedX < WIDTH - 1) { const lastValue = points[lastPlottedX]; for (let x = lastPlottedX + 1; x < WIDTH; x++) { points[x] = lastValue; } }
+                dom.pointInfo.textContent = `${canvasPoints.length} points plotted.`;
+                calculateFourier();
+                drawAll();
+            }
+            
+            function calculateFourier() { fourierCoeffs = []; const N = points.length; for (let n = 0; n <= MAX_HARMONICS; n++) { let an = 0, bn = 0; for (let i = 0; i < N; i++) { const signalValue = ((HEIGHT / 2) - points[i]) / (HEIGHT/2), angle = 2 * Math.PI * n * i / N; an += signalValue * Math.cos(angle); bn += signalValue * Math.sin(angle); } an = (2 / N) * an; bn = (2 / N) * bn; if (n === 0) an /= 2; fourierCoeffs.push({ n, an, bn, amp: Math.sqrt(an * an + bn * bn) }); } }
+
+            // NEW: Separated reconstruction calculation from drawing
+            function calculateReconstruction(numHarmonics) {
+                if (fourierCoeffs.length === 0) return [];
+                const reconData = [];
+                for (let x = 0; x < WIDTH; x++) {
+                    let y_norm = fourierCoeffs[0].an;
+                    for (let n = 1; n <= numHarmonics; n++) {
+                        const { an, bn } = fourierCoeffs[n];
+                        y_norm += an * Math.cos(2 * Math.PI * n * x / WIDTH) + bn * Math.sin(2 * Math.PI * n * x / WIDTH);
+                    }
+                    reconData.push(y_norm);
+                }
+                return reconData;
+            }
+
+            function perpendicularDistance(pt, p1, p2) { let dx = p2.x - p1.x, dy = p2.y - p1.y; if (dx === 0 && dy === 0) return Math.hypot(pt.x - p1.x, pt.y - p1.y); let t = ((pt.x - p1.x) * dx + (pt.y - p1.y) * dy) / (dx*dx + dy*dy); t = Math.max(0, Math.min(1, t)); return Math.hypot(pt.x - (p1.x + t * dx), pt.y - (p1.y + t * dy)); }
+            function ramerDouglasPeucker(pointList, epsilon) { let dmax = 0, index = 0, end = pointList.length - 1; for (let i = 1; i < end; i++) { let d = perpendicularDistance(pointList[i], pointList[0], pointList[end]); if (d > dmax) { index = i; dmax = d; } } if (dmax > epsilon) { const res1 = ramerDouglasPeucker(pointList.slice(0, index + 1), epsilon), res2 = ramerDouglasPeucker(pointList.slice(index, end + 1), epsilon); return res1.slice(0, -1).concat(res2); } else { return [pointList[0], pointList[end]]; } }
+            function updateTextAreaFromDrawing() { const rawPoints = points.map((y, x) => ({x, y})), epsilon = parseFloat(dom.epsilonSlider.value), keyPoints = ramerDouglasPeucker(rawPoints, epsilon); dom.pointInfo.textContent = `Extracted ${keyPoints.length} key points (ε = ${epsilon}):`; dom.pointInput.value = keyPoints.map(p => { const userP = canvasToUser(p); return `${userP.x.toFixed(2)}, ${userP.y.toFixed(2)}`; }).join('\n'); }
+            function drawGrid(ctx, markZeroLine = false) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.strokeStyle = '#3e3e42'; ctx.lineWidth = 0.5; for (let x = 0; x < ctx.canvas.width; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ctx.canvas.height); ctx.stroke(); } for (let y = 0; y < ctx.canvas.height; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(ctx.canvas.width, y); ctx.stroke(); } ctx.strokeStyle = '#505050'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, HEIGHT/2); ctx.lineTo(WIDTH, HEIGHT/2); ctx.stroke(); if (markZeroLine) { ctx.fillStyle = '#b4b4b4'; ctx.font = '12px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('0', 20, HEIGHT / 2); } }
+
+            function drawAll() {
+                drawGrid(d_ctx, true); drawGrid(r_ctx, true); drawGrid(s_ctx, false);
+                d_ctx.strokeStyle = '#9cdcfe'; d_ctx.lineWidth = 2; d_ctx.beginPath(); d_ctx.moveTo(0, points[0]); for (let i = 1; i < WIDTH; i++) { d_ctx.lineTo(i, points[i]); } d_ctx.stroke();
+
+                const numHarmonics = parseInt(dom.harmonicsSlider.value);
+                lastReconData = calculateReconstruction(numHarmonics); // Update the global reconstruction data
+
+                r_ctx.strokeStyle = '#4ec9b0'; r_ctx.lineWidth = 2; r_ctx.beginPath();
+                let isClipped = false;
+                if (lastReconData.length > 0) {
+                    for(let x=0; x < lastReconData.length; x++) {
+                        const y_norm = lastReconData[x];
+                        if (Math.abs(y_norm) > 1.0) { isClipped = true; }
+                        const y_canvas = HEIGHT / 2 - y_norm * (HEIGHT / 2);
+                        x === 0 ? r_ctx.moveTo(x, y_canvas) : r_ctx.lineTo(x, y_canvas);
+                    }
+                }
+                r_ctx.stroke(); dom.autoScaleButton.style.display = isClipped ? 'block' : 'none';
+
+                if (fourierCoeffs.length > 1) { const maxAmp = Math.max(0.001, ...fourierCoeffs.slice(0, MAX_HARMONICS + 1).map(c => Math.abs(c.n === 0 ? c.an : c.amp))); const barWidth = s_ctx.canvas.width / (MAX_HARMONICS + 1); const dcHeight = (Math.abs(fourierCoeffs[0].an) / maxAmp) * (s_ctx.canvas.height - 10); s_ctx.fillStyle = '#ce9178'; s_ctx.fillRect(0, s_ctx.canvas.height - dcHeight, barWidth * 0.8, dcHeight); for (let n = 1; n <= MAX_HARMONICS; n++) { const { amp } = fourierCoeffs[n]; const barHeight = (amp / maxAmp) * (s_ctx.canvas.height - 10); s_ctx.fillStyle = n <= numHarmonics ? '#569cd6' : '#3e3e42'; s_ctx.fillRect(n * barWidth, s_ctx.canvas.height - barHeight, barWidth * 0.8, barHeight); } }
+            }
+
+            function drawAutoScalePlot(reconData) {
+                if (!reconData || reconData.length === 0) return;
+                const canvas = dom.autoScaleCanvas, ctx = canvas.getContext('2d'), W = canvas.width, H = canvas.height; const trueMax = Math.max(...reconData), trueMin = Math.min(...reconData); const yRange = trueMax - trueMin === 0 ? 1 : trueMax - trueMin; const paddedMax = trueMax + yRange * 0.1, paddedMin = trueMin - yRange * 0.1, newYRange = paddedMax - paddedMin; ctx.clearRect(0, 0, W, H); ctx.strokeStyle = '#3e3e42'; ctx.lineWidth = 0.5; for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); } const zeroLineY = H - ((0 - paddedMin) / newYRange) * H; if (zeroLineY > 0 && zeroLineY < H) { ctx.strokeStyle = '#505050'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, zeroLineY); ctx.lineTo(W, zeroLineY); ctx.stroke(); } const { yMax } = getAxisLimits(); ctx.fillStyle = '#b4b4b4'; ctx.font = '12px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText((paddedMax * yMax).toFixed(2), 35, 10); ctx.fillText((paddedMin * yMax).toFixed(2), 35, H - 10); if (zeroLineY > 15 && zeroLineY < H - 15) { ctx.fillText('0.00', 35, zeroLineY); } ctx.strokeStyle = '#4ec9b0'; ctx.lineWidth = 2; ctx.beginPath(); reconData.forEach((y_norm, i) => { const x_canvas = (i / (reconData.length - 1)) * W, y_canvas = H - ((y_norm - paddedMin) / newYRange) * H; i === 0 ? ctx.moveTo(x_canvas, y_canvas) : ctx.lineTo(x_canvas, y_canvas); }); ctx.stroke();
+            }
+
+            function clearPoints() { points.fill(HEIGHT / 2); fourierCoeffs = []; lastReconData = []; dom.pointInfo.classList.remove('warning'); }
+            function clearAll() { isDrawing = false; dom.pointInput.value = ''; dom.pointInfo.textContent = ''; clearPoints(); drawAll(); }
+            
+            function startDrawing(e) { isDrawing = true; clearPoints(); dom.pointInput.value = ''; dom.pointInfo.textContent = 'Drawing...'; lastMousePos = getMousePos(dom.drawingCanvas, e); points[lastMousePos.x] = lastMousePos.y; drawAll(); }
+            function stopDrawing() { if (isDrawing) { isDrawing = false; updateTextAreaFromDrawing(); calculateFourier(); drawAll(); } }
+            function draw(e) { if (!isDrawing) return; const c = getMousePos(dom.drawingCanvas, e), p0=lastMousePos, p1=c, dx=p1.x-p0.x, dy=p1.y-p0.y; for(let x=Math.min(p0.x,p1.x); x<=Math.max(p0.x,p1.x); x++){ const y=dx===0?p0.y:p0.y+dy*(x-p0.x)/dx; if(x>=0&&x<WIDTH)points[x]=y; } lastMousePos=c; drawAll(); }
+
+            dom.drawingCanvas.addEventListener('mousedown', startDrawing);
+            dom.drawingCanvas.addEventListener('mouseup', stopDrawing);
+            dom.drawingCanvas.addEventListener('mouseout', stopDrawing);
+            dom.drawingCanvas.addEventListener('mousemove', draw);
+
+            // NEW: Event handlers for synchronized sliders
+            dom.harmonicsSlider.addEventListener('input', e => {
+                const value = e.target.value;
+                dom.harmonicsValue.textContent = value;
+                dom.modalHarmonicsSlider.value = value;
+                dom.modalHarmonicsValue.textContent = value;
+                drawAll();
+            });
+
+            dom.modalHarmonicsSlider.addEventListener('input', e => {
+                const value = e.target.value;
+                dom.modalHarmonicsValue.textContent = value;
+                dom.harmonicsSlider.value = value;
+                dom.harmonicsValue.textContent = value;
+                
+                // Recalculate main plots to update spectrum and lastReconData
+                drawAll(); 
+                // Redraw the modal canvas with the new data
+                drawAutoScalePlot(lastReconData); 
+            });
+
+            dom.epsilonSlider.addEventListener('input', e => { dom.epsilonValue.textContent = ""; if (!isDrawing && dom.pointInput.value) { updateTextAreaFromDrawing(); } });
+            dom.xMaxInput.addEventListener('change', () => { dom.pointInfo.classList.remove('warning'); dom.pointInfo.textContent = ''; const text = dom.pointInput.value.trim(); if (!text) { drawAll(); return; } const newXMax = parseFloat(dom.xMaxInput.value); let userPoints = []; text.split('\n').forEach(line => { const parts = line.split(','); if(parts.length === 2) userPoints.push({ x: parseFloat(parts[0]), y: parseFloat(parts[1]) }); }); userPoints.sort((a,b) => a.x - b.x); const lastPoint = userPoints[userPoints.length - 1]; if (newXMax > lastPoint.x) { dom.pointInput.value += `\n${newXMax}, ${lastPoint.y}`; dom.pointInfo.textContent = `Extended period to new X-Max of ${newXMax}.`; } else if (newXMax < lastPoint.x) { dom.pointInfo.textContent = `Warning: Points beyond X-Max=${newXMax} are ignored.`; dom.pointInfo.classList.add('warning'); } plotFromText(); });
+            dom.yMaxInput.addEventListener('change', () => { if (dom.pointInput.value) plotFromText(); else drawAll(); });
+            dom.clearButton.addEventListener('click', clearAll);
+            dom.plotPointsButton.addEventListener('click', plotFromText);
+            
+            dom.autoScaleButton.addEventListener('click', () => {
+                // NEW: Sync slider value when opening modal
+                dom.modalHarmonicsSlider.value = dom.harmonicsSlider.value;
+                dom.modalHarmonicsValue.textContent = dom.harmonicsSlider.value;
+                drawAutoScalePlot(lastReconData);
+                dom.autoScaleModal.style.display = 'flex';
+            });
+            dom.modalCloseButton.addEventListener('click', () => { dom.autoScaleModal.style.display = 'none'; });
+            window.addEventListener('click', (event) => { if (event.target == dom.autoScaleModal) { dom.autoScaleModal.style.display = 'none'; } });
+
+            const setupPreset = (type) => { const {xMax, yMax} = getAxisLimits(); if (type === 'square') dom.pointInput.value = `0, ${yMax}\n${xMax/2 * 0.999}, ${yMax}\n${xMax/2}, ${-yMax}\n${xMax * 0.999}, ${-yMax}\n${xMax}, ${-yMax}`; else if (type === 'triangle') dom.pointInput.value = `0, 0\n${xMax/4}, ${yMax}\n${3*xMax/4}, ${-yMax}\n${xMax}, 0`; else if (type === 'sawtooth') dom.pointInput.value = `0, ${-yMax}\n${xMax}, ${yMax}`; plotFromText(); }
+            dom.presetSquare.addEventListener('click', () => setupPreset('square'));
+            dom.presetTriangle.addEventListener('click', () => setupPreset('triangle'));
+            dom.presetSawtooth.addEventListener('click', () => setupPreset('sawtooth'));
+
+            clearAll();
+        });
+    </script>
+</body>
+</html>
