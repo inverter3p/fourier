@@ -9,47 +9,56 @@ An intuitive, web-based tool for exploring the fascinating world of Fourier Seri
 
 ---
 
-## Features
+## How to Use
 
-*   ✍️ **Draw Your Own Waveforms:** Use your mouse to draw any periodic function directly on the canvas.
-*   🔢 **Plot from Data:** Manually enter or paste `x,y` coordinates to plot precise functions. The axes automatically scale to fit your data.
-*   🚀 **Classic Presets:** Instantly generate Square, Triangle, and Sawtooth waves to see their famous Fourier series in action.
-*   🎚️ **Real-time Harmonic Control:** Adjust the number of harmonics with a slider and see the reconstructed wave and frequency spectrum update instantly.
-*   📊 **Frequency Spectrum Visualization:** View the magnitude of the Fourier coefficients for your signal, clearly distinguishing the DC component and the harmonic amplitudes.
-*   🔍 **Unclipped Auto-Scaling:** When Gibbs phenomenon causes clipping, a dedicated modal window opens to show the waveform in its full, unclipped range.
-*   ⚙️ **Interactive Modal:** The auto-scale window has its own synchronized harmonics slider, allowing for detailed analysis of ringing and convergence.
+This tool provides three primary ways to define a waveform. The core concept is that the **X-Max** value defines the fundamental period (T) of your signal.
+
+### 1. Draw a Waveform with Your Mouse
+
+This is the most intuitive way to get started.
+-   Simply click and drag your mouse across the **"Your Waveform"** canvas on the left.
+-   As you draw, the application instantly calculates the Fourier series and displays the reconstructed wave and its frequency spectrum.
+-   Once you release the mouse, the coordinates of your drawing are automatically extracted into the text area below.
+
+### 2. Plot Precise Points from the Text Area
+
+For creating precise or complex waveforms, you can input `x,y` coordinates directly.
+-   Enter coordinates in the text area, with each point on a new line (e.g., `0, 100` then `1, -50`).
+-   When you click **"Plot from Points"**, the application reads your data and:
+    -   **Automatically scales the axes:** If your points go beyond the current `X-Max` or `Y-Max` values, the fields will update to fit all of your data.
+    -   Draws the resulting waveform by connecting your points.
+-   This is perfect for plotting data from a spreadsheet or another program.
+
+### 3. Use a Preset Waveform
+
+Quickly explore classic examples of Fourier series.
+-   First, set the **X-Max** and **Y-Max** to define the period and amplitude you want. For example, to create a square wave with a period of 2π and an amplitude of 1, set `X-Max` to `6.28` and `Y-Max` to `1`.
+-   Click **"Square"**, **"Triangle"**, or **"Sawtooth"**.
+-   The tool will generate the necessary points in the text area and plot the waveform according to your specified scales.
 
 ---
 
-## How to Use
+## Key Features
 
-### As a User
-There are two easy ways to run the explorer:
-1.  **Click the [Live Demo link]([https://your-github-username.github.io/your-repo-name/](https://inverter3p.github.io/fourier/) above.**
-2.  Alternatively, download the `index.html` file from this repository and open it in your favorite web browser (like Chrome, Firefox, or Edge).
-
-### As a Developer
-The project is intentionally simple to modify:
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/your-github-username/your-repo-name.git
-    ```
-2.  Open the `index.html` file in a code editor.
-3.  All the HTML, CSS, and JavaScript are in that single file. Make your changes, save, and refresh your browser to see them.
+*   **Real-time Interaction:** All plots update instantly as you draw or change the number of harmonics with the slider.
+*   **Harmonic Analysis:** Use the **"Harmonics"** slider to see how adding more sine/cosine terms improves the accuracy of the reconstructed wave.
+*   **Frequency Spectrum:** The bottom chart shows the amplitude of each harmonic, giving you insight into the signal's frequency content.
+*   **Auto-Scale for Clipping:** If the reconstructed wave (especially for square waves) exceeds the plot boundaries due to Gibbs phenomenon, an **"Auto-scale"** button appears. Click it to open a modal window showing the true, unclipped waveform.
+*   **Zero-Dependency:** Just download the `index.html` file and open it in any modern web browser.
 
 ---
 
 ## Technical Details
 
-*   **Frontend:** Vanilla JavaScript, HTML5, and CSS. No frameworks or libraries are used, making the code easy to read and understand.
-*   **Fourier Analysis:** The application performs a Discrete Fourier Transform (DFT) to calculate the `a_n` and `b_n` coefficients of the series.
-*   **Point Extraction:** The "drawing-to-text" feature uses the **Ramer-Douglas-Peucker algorithm** to simplify the drawn path into a concise set of key points, making the data more manageable.
+*   **Frontend:** Vanilla JavaScript, HTML5, and CSS.
+*   **Fourier Analysis:** Performs a Discrete Fourier Transform (DFT) to calculate the series coefficients.
+*   **Path Simplification:** Uses the Ramer-Douglas-Peucker algorithm to convert freehand drawings into a manageable set of points.
 
 ---
 
+## Contributing
 
-
----
+Contributions are welcome! Please feel free to fork the repository, make improvements, and submit a pull request.
 
 ## License
 
