@@ -2,7 +2,7 @@
 
 An intuitive, web-based tool for exploring the fascinating world of Fourier Series. This application allows users to visualize how complex periodic waveforms can be decomposed into a sum of simple sine and cosine waves. It's built with vanilla JavaScript, HTML, and CSS, and runs entirely in a single, self-contained file.
 
-### [➡️ Try the Live Demo!](https://inverter3p.github.io/fourier/)
+### [➡️ Try the Live Demo!](https://inverter3p.github.io/fourier/fourier.html)
 
 
 ![fourier](https://github.com/user-attachments/assets/9d6355f0-de9d-42df-8db0-c0ff2ca6110c)
