@@ -3,18 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Fourier Series Explorer v12</title>
+    <title>Interactive Fourier Series Explorer v13 (Responsive)</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #1e1e1e; color: #d4d4d4; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
-        h1 { color: #569cd6; margin-bottom: 5px; }
-        p { margin-top: 0; margin-bottom: 20px; color: #9cdcfe; max-width: 800px; text-align: center; }
+        /* MODIFICATION: General styling for better responsiveness */
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #1e1e1e; color: #d4d4d4; display: flex; flex-direction: column; align-items: stretch; margin: 0; padding: 10px; box-sizing: border-box; }
+        h1 { color: #569cd6; margin-bottom: 5px; text-align: center; }
+        p { margin-top: 0; margin-bottom: 20px; color: #9cdcfe; max-width: 800px; text-align: center; align-self: center; }
         .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; }
-        .canvas-container { display: flex; flex-direction: column; align-items: center; background-color: #252526; border-radius: 8px; padding: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        .canvas-header { display: flex; justify-content: space-between; align-items: center; width: 400px; }
+        .canvas-container { display: flex; flex-direction: column; align-items: center; background-color: #252526; border-radius: 8px; padding: 15px; box-sizing: border-box; box-shadow: 0 4px 8px rgba(0,0,0,0.3); flex-grow: 1; }
+        .canvas-header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 400px; }
         h3 { margin: 0 0 10px 0; font-weight: 500; }
-        canvas { background-color: #0c0c0c; border: 1px solid #3e3e42; cursor: crosshair; border-radius: 4px; }
-        .controls { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; background-color: #252526; padding: 20px; border-radius: 8px; width: 820px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        .row { display: flex; gap: 20px; width: 100%; align-items: center; }
+        /* MODIFICATION: Make canvas display responsive, but drawing canvas resolution is fixed in HTML */
+        canvas { background-color: #0c0c0c; border: 1px solid #3e3e42; cursor: crosshair; border-radius: 4px; max-width: 100%; }
+        /* MODIFICATION: Touch action none to improve drawing experience on some devices */
+        #drawingCanvas { touch-action: none; }
+
+        /* MODIFICATION: Make controls container responsive */
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; background-color: #252526; padding: 20px; border-radius: 8px; width: 100%; max-width: 820px; box-sizing: border-box; align-self: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        /* MODIFICATION: Allow rows to wrap on smaller screens */
+        .row { display: flex; gap: 20px; width: 100%; align-items: center; flex-wrap: wrap; }
         .slider-group { display: flex; align-items: center; gap: 10px; width: 100%; }
         .input-group { display: flex; align-items: center; gap: 5px; }
         label { white-space: nowrap; }
@@ -26,28 +33,29 @@
         button:hover { background-color: #408ac9; }
         #autoScaleButton { padding: 4px 8px; font-size: 13px; background-color: #ce9178; }
         #autoScaleButton:hover { background-color: #d16940; }
-        .preset-buttons { display: flex; gap: 10px; }
+        .preset-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         .point-input-container { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-        textarea { width: calc(100% - 20px); height: 100px; background-color: #3c3c3c; color: #d4d4d4; border: 1px solid #3e3e42; border-radius: 4px; padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: 14px; }
+        /* MODIFICATION: Make textarea fully responsive */
+        textarea { width: 100%; box-sizing: border-box; height: 100px; background-color: #3c3c3c; color: #d4d4d4; border: 1px solid #3e3e42; border-radius: 4px; padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: 14px; }
 
+        /* MODIFICATION: Make modal responsive */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
-        .modal-content { background-color: #252526; padding: 20px; border: 1px solid #3e3e42; border-radius: 8px; width: 840px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; position: relative; }
+        .modal-content { background-color: #252526; padding: 20px; border: 1px solid #3e3e42; border-radius: 8px; width: 95%; max-width: 840px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; position: relative; }
         .close-button { color: #aaaaaa; position: absolute; top: 5px; right: 15px; font-size: 28px; font-weight: bold; }
         .close-button:hover, .close-button:focus { color: #fff; text-decoration: none; cursor: pointer; }
-        #autoScaleCanvas { background-color: #0c0c0c; border: 1px solid #3e3e42; border-radius: 4px; margin-top: 10px; }
-        .modal-content .slider-group { padding: 10px 20px; box-sizing: border-box; } /* NEW: Style for modal slider */
+        #autoScaleCanvas { background-color: #0c0c0c; border: 1px solid #3e3e42; border-radius: 4px; margin-top: 10px; width: 100%; height: auto; }
+        .modal-content .slider-group { padding: 10px 20px; box-sizing: border-box; }
     </style>
 </head>
 <body>
     <h1>Interactive Fourier Series Explorer</h1>
     <p>Draw your waveform, plot x,y data points, or use presets to instantly see the signal reconstruction and frequency spectrum.</p>
     <div class="container">
-        <div class="canvas-container"><h3>Draw Periodic Waveform</h3><canvas id="drawingCanvas" width="400" height="200"></canvas></div>
-        <div class="canvas-container">
-            <div class="canvas-header"><h3>Reconstructed Wave</h3><button id="autoScaleButton" style="display:none;">Auto-scale</button></div>
-            <canvas id="reconstructionCanvas" width="400" height="200"></canvas>
-        </div>
-        <div class="canvas-container"><h3>Frequency Spectrum (up to 100th order)</h3><canvas id="spectrumCanvas" width="820" height="200"></canvas></div>
+        <!-- Drawing and Recon canvases are kept at a fixed resolution for the analysis -->
+        <div class="canvas-container"><div class="canvas-header"><h3>Draw Periodic Waveform</h3></div><canvas id="drawingCanvas" width="400" height="200"></canvas></div>
+        <div class="canvas-container"><div class="canvas-header"><h3>Reconstructed Wave</h3><button id="autoScaleButton" style="display:none;">Auto-scale</button></div><canvas id="reconstructionCanvas" width="400" height="200"></canvas></div>
+        <!-- Spectrum canvas container will be full width, but the canvas element itself will be sized by JS -->
+        <div class="canvas-container" style="min-width: 100%;"><h3>Frequency Spectrum (up to 100th order)</h3><canvas id="spectrumCanvas" height="200"></canvas></div>
     </div>
     <div class="controls">
         <div class="row">
@@ -67,14 +75,11 @@
         <button id="clearButton">Clear All</button>
     </div>
     
-    <!-- Modal for Auto-scaling -->
     <div id="autoScaleModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" id="modalCloseButton">&times;</span>
+            <span class="close-button" id="modalCloseButton">×</span>
             <h3>Auto-scaled Reconstructed Wave</h3>
-            <!-- NEW: Added slider to the modal -->
-            
-            <canvas id="autoScaleCanvas" width="800" height="400"></canvas>
+            <canvas id="autoScaleCanvas" height="400"></canvas>
             <div class="slider-group">
                 <label for="modalHarmonicsSlider">Harmonics:</label>
                 <input type="range" id="modalHarmonicsSlider" min="1" max="100" value="1">
@@ -92,7 +97,6 @@
                 xMaxInput: document.getElementById('xMaxInput'), yMaxInput: document.getElementById('yMaxInput'),
                 presetSquare: document.getElementById('presetSquare'), presetTriangle: document.getElementById('presetTriangle'), presetSawtooth: document.getElementById('presetSawtooth'),
                 autoScaleButton: document.getElementById('autoScaleButton'), autoScaleModal: document.getElementById('autoScaleModal'), autoScaleCanvas: document.getElementById('autoScaleCanvas'), modalCloseButton: document.getElementById('modalCloseButton'),
-                // NEW: DOM elements for the modal's slider
                 modalHarmonicsSlider: document.getElementById('modalHarmonicsSlider'),
                 modalHarmonicsValue: document.getElementById('modalHarmonicsValue'),
             };
@@ -100,14 +104,23 @@
             const d_ctx = dom.drawingCanvas.getContext('2d'), r_ctx = dom.reconCanvas.getContext('2d'), s_ctx = dom.spectrumCanvas.getContext('2d');
             const WIDTH = dom.drawingCanvas.width, HEIGHT = dom.drawingCanvas.height, MAX_HARMONICS = 100;
 
-            let isDrawing = false, lastMousePos = { x: 0, y: 0 };
+            let isDrawing = false, lastPos = { x: 0, y: 0 };
             let points = new Array(WIDTH).fill(HEIGHT / 2);
             let fourierCoeffs = [], lastReconData = [];
             
             function getAxisLimits() { return { xMax: parseFloat(dom.xMaxInput.value) || WIDTH, yMax: parseFloat(dom.yMaxInput.value) || HEIGHT / 2 }; }
             function userToCanvas(userPoint) { const { xMax, yMax } = getAxisLimits(); const canvasX = (userPoint.x / xMax) * WIDTH; const canvasY = HEIGHT / 2 - (userPoint.y / yMax) * (HEIGHT / 2); return { x: canvasX, y: canvasY }; }
             function canvasToUser(canvasPoint) { const { xMax, yMax } = getAxisLimits(); const userX = (canvasPoint.x / WIDTH) * xMax; const userY = ((HEIGHT / 2) - canvasPoint.y) / (HEIGHT / 2) * yMax; return { x: userX, y: userY }; }
-            function getMousePos(canvas, evt) { const rect = canvas.getBoundingClientRect(); return { x: Math.round(evt.clientX - rect.left), y: Math.round(evt.clientY - rect.top) }; }
+            
+            // MODIFICATION: Renamed to getEventPos and updated to handle both touch and mouse events.
+            function getEventPos(canvas, evt) {
+                const rect = canvas.getBoundingClientRect();
+                const touch = evt.touches ? evt.touches[0] : null;
+                return {
+                    x: Math.round((touch ? touch.clientX : evt.clientX) - rect.left),
+                    y: Math.round((touch ? touch.clientY : evt.clientY) - rect.top)
+                };
+            }
 
             function plotFromText() {
                 clearPoints();
@@ -131,8 +144,7 @@
             }
             
             function calculateFourier() { fourierCoeffs = []; const N = points.length; for (let n = 0; n <= MAX_HARMONICS; n++) { let an = 0, bn = 0; for (let i = 0; i < N; i++) { const signalValue = ((HEIGHT / 2) - points[i]) / (HEIGHT/2), angle = 2 * Math.PI * n * i / N; an += signalValue * Math.cos(angle); bn += signalValue * Math.sin(angle); } an = (2 / N) * an; bn = (2 / N) * bn; if (n === 0) an /= 2; fourierCoeffs.push({ n, an, bn, amp: Math.sqrt(an * an + bn * bn) }); } }
-
-            // NEW: Separated reconstruction calculation from drawing
+            
             function calculateReconstruction(numHarmonics) {
                 if (fourierCoeffs.length === 0) return [];
                 const reconData = [];
@@ -150,14 +162,27 @@
             function perpendicularDistance(pt, p1, p2) { let dx = p2.x - p1.x, dy = p2.y - p1.y; if (dx === 0 && dy === 0) return Math.hypot(pt.x - p1.x, pt.y - p1.y); let t = ((pt.x - p1.x) * dx + (pt.y - p1.y) * dy) / (dx*dx + dy*dy); t = Math.max(0, Math.min(1, t)); return Math.hypot(pt.x - (p1.x + t * dx), pt.y - (p1.y + t * dy)); }
             function ramerDouglasPeucker(pointList, epsilon) { let dmax = 0, index = 0, end = pointList.length - 1; for (let i = 1; i < end; i++) { let d = perpendicularDistance(pointList[i], pointList[0], pointList[end]); if (d > dmax) { index = i; dmax = d; } } if (dmax > epsilon) { const res1 = ramerDouglasPeucker(pointList.slice(0, index + 1), epsilon), res2 = ramerDouglasPeucker(pointList.slice(index, end + 1), epsilon); return res1.slice(0, -1).concat(res2); } else { return [pointList[0], pointList[end]]; } }
             function updateTextAreaFromDrawing() { const rawPoints = points.map((y, x) => ({x, y})), epsilon = parseFloat(dom.epsilonSlider.value), keyPoints = ramerDouglasPeucker(rawPoints, epsilon); dom.pointInfo.textContent = `Extracted ${keyPoints.length} key points (ε = ${epsilon}):`; dom.pointInput.value = keyPoints.map(p => { const userP = canvasToUser(p); return `${userP.x.toFixed(2)}, ${userP.y.toFixed(2)}`; }).join('\n'); }
-            function drawGrid(ctx, markZeroLine = false) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.strokeStyle = '#3e3e42'; ctx.lineWidth = 0.5; for (let x = 0; x < ctx.canvas.width; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ctx.canvas.height); ctx.stroke(); } for (let y = 0; y < ctx.canvas.height; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(ctx.canvas.width, y); ctx.stroke(); } ctx.strokeStyle = '#505050'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, HEIGHT/2); ctx.lineTo(WIDTH, HEIGHT/2); ctx.stroke(); if (markZeroLine) { ctx.fillStyle = '#b4b4b4'; ctx.font = '12px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('0', 20, HEIGHT / 2); } }
+            
+            // MODIFICATION: Grid drawing now uses the canvas's own dimensions.
+            function drawGrid(ctx, markZeroLine = false) { 
+                const canvasW = ctx.canvas.width;
+                const canvasH = ctx.canvas.height;
+                const yCenter = markZeroLine ? HEIGHT / 2 : canvasH / 2; // Use fixed HEIGHT for drawing/recon y-center
+                ctx.clearRect(0, 0, canvasW, canvasH); ctx.strokeStyle = '#3e3e42'; ctx.lineWidth = 0.5; 
+                for (let x = 0; x < canvasW; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvasH); ctx.stroke(); }
+                for (let y = 0; y < canvasH; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvasW, y); ctx.stroke(); }
+                if (markZeroLine) {
+                    ctx.strokeStyle = '#505050'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, yCenter); ctx.lineTo(canvasW, yCenter); ctx.stroke(); 
+                    ctx.fillStyle = '#b4b4b4'; ctx.font = '12px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('0', 20, yCenter);
+                }
+            }
 
             function drawAll() {
                 drawGrid(d_ctx, true); drawGrid(r_ctx, true); drawGrid(s_ctx, false);
                 d_ctx.strokeStyle = '#9cdcfe'; d_ctx.lineWidth = 2; d_ctx.beginPath(); d_ctx.moveTo(0, points[0]); for (let i = 1; i < WIDTH; i++) { d_ctx.lineTo(i, points[i]); } d_ctx.stroke();
 
                 const numHarmonics = parseInt(dom.harmonicsSlider.value);
-                lastReconData = calculateReconstruction(numHarmonics); // Update the global reconstruction data
+                lastReconData = calculateReconstruction(numHarmonics);
 
                 r_ctx.strokeStyle = '#4ec9b0'; r_ctx.lineWidth = 2; r_ctx.beginPath();
                 let isClipped = false;
@@ -171,7 +196,19 @@
                 }
                 r_ctx.stroke(); dom.autoScaleButton.style.display = isClipped ? 'block' : 'none';
 
-                if (fourierCoeffs.length > 1) { const maxAmp = Math.max(0.001, ...fourierCoeffs.slice(0, MAX_HARMONICS + 1).map(c => Math.abs(c.n === 0 ? c.an : c.amp))); const barWidth = s_ctx.canvas.width / (MAX_HARMONICS + 1); const dcHeight = (Math.abs(fourierCoeffs[0].an) / maxAmp) * (s_ctx.canvas.height - 10); s_ctx.fillStyle = '#ce9178'; s_ctx.fillRect(0, s_ctx.canvas.height - dcHeight, barWidth * 0.8, dcHeight); for (let n = 1; n <= MAX_HARMONICS; n++) { const { amp } = fourierCoeffs[n]; const barHeight = (amp / maxAmp) * (s_ctx.canvas.height - 10); s_ctx.fillStyle = n <= numHarmonics ? '#569cd6' : '#3e3e42'; s_ctx.fillRect(n * barWidth, s_ctx.canvas.height - barHeight, barWidth * 0.8, barHeight); } }
+                if (fourierCoeffs.length > 1) { 
+                    const s_canvas_width = s_ctx.canvas.width; // Use dynamic width
+                    const s_canvas_height = s_ctx.canvas.height; // Use dynamic height
+                    const maxAmp = Math.max(0.001, ...fourierCoeffs.slice(0, MAX_HARMONICS + 1).map(c => Math.abs(c.n === 0 ? c.an : c.amp))); 
+                    const barWidth = s_canvas_width / (MAX_HARMONICS + 1); 
+                    const dcHeight = (Math.abs(fourierCoeffs[0].an) / maxAmp) * (s_canvas_height - 10); 
+                    s_ctx.fillStyle = '#ce9178'; s_ctx.fillRect(0, s_canvas_height - dcHeight, barWidth * 0.8, dcHeight); 
+                    for (let n = 1; n <= MAX_HARMONICS; n++) { 
+                        const { amp } = fourierCoeffs[n]; const barHeight = (amp / maxAmp) * (s_canvas_height - 10); 
+                        s_ctx.fillStyle = n <= numHarmonics ? '#569cd6' : '#3e3e42'; 
+                        s_ctx.fillRect(n * barWidth, s_canvas_height - barHeight, barWidth * 0.8, barHeight); 
+                    } 
+                }
             }
 
             function drawAutoScalePlot(reconData) {
@@ -182,16 +219,33 @@
             function clearPoints() { points.fill(HEIGHT / 2); fourierCoeffs = []; lastReconData = []; dom.pointInfo.classList.remove('warning'); }
             function clearAll() { isDrawing = false; dom.pointInput.value = ''; dom.pointInfo.textContent = ''; clearPoints(); drawAll(); }
             
-            function startDrawing(e) { isDrawing = true; clearPoints(); dom.pointInput.value = ''; dom.pointInfo.textContent = 'Drawing...'; lastMousePos = getMousePos(dom.drawingCanvas, e); points[lastMousePos.x] = lastMousePos.y; drawAll(); }
+            // MODIFICATION: Updated to handle touch events and prevent default scrolling.
+            function startDrawing(e) { 
+                if (e.type === 'touchstart') e.preventDefault();
+                isDrawing = true; clearPoints(); dom.pointInput.value = ''; dom.pointInfo.textContent = 'Drawing...'; 
+                lastPos = getEventPos(dom.drawingCanvas, e); 
+                points[lastPos.x] = lastPos.y; 
+                drawAll(); 
+            }
             function stopDrawing() { if (isDrawing) { isDrawing = false; updateTextAreaFromDrawing(); calculateFourier(); drawAll(); } }
-            function draw(e) { if (!isDrawing) return; const c = getMousePos(dom.drawingCanvas, e), p0=lastMousePos, p1=c, dx=p1.x-p0.x, dy=p1.y-p0.y; for(let x=Math.min(p0.x,p1.x); x<=Math.max(p0.x,p1.x); x++){ const y=dx===0?p0.y:p0.y+dy*(x-p0.x)/dx; if(x>=0&&x<WIDTH)points[x]=y; } lastMousePos=c; drawAll(); }
+            function draw(e) { 
+                if (!isDrawing) return; 
+                if (e.type === 'touchmove') e.preventDefault();
+                const c = getEventPos(dom.drawingCanvas, e), p0=lastPos, p1=c, dx=p1.x-p0.x, dy=p1.y-p0.y; 
+                for(let x=Math.min(p0.x,p1.x); x<=Math.max(p0.x,p1.x); x++){ const y=dx===0?p0.y:p0.y+dy*(x-p0.x)/dx; if(x>=0&&x<WIDTH)points[x]=y; } 
+                lastPos=c; drawAll(); 
+            }
 
+            // MODIFICATION: Add all event listeners, including touch events.
             dom.drawingCanvas.addEventListener('mousedown', startDrawing);
             dom.drawingCanvas.addEventListener('mouseup', stopDrawing);
             dom.drawingCanvas.addEventListener('mouseout', stopDrawing);
             dom.drawingCanvas.addEventListener('mousemove', draw);
+            dom.drawingCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+            dom.drawingCanvas.addEventListener('touchend', stopDrawing);
+            dom.drawingCanvas.addEventListener('touchcancel', stopDrawing);
+            dom.drawingCanvas.addEventListener('touchmove', draw, { passive: false });
 
-            // NEW: Event handlers for synchronized sliders
             dom.harmonicsSlider.addEventListener('input', e => {
                 const value = e.target.value;
                 dom.harmonicsValue.textContent = value;
@@ -205,10 +259,8 @@
                 dom.modalHarmonicsValue.textContent = value;
                 dom.harmonicsSlider.value = value;
                 dom.harmonicsValue.textContent = value;
-                
-                // Recalculate main plots to update spectrum and lastReconData
+                lastReconData = calculateReconstruction(parseInt(value));
                 drawAll(); 
-                // Redraw the modal canvas with the new data
                 drawAutoScalePlot(lastReconData); 
             });
 
@@ -219,9 +271,10 @@
             dom.plotPointsButton.addEventListener('click', plotFromText);
             
             dom.autoScaleButton.addEventListener('click', () => {
-                // NEW: Sync slider value when opening modal
                 dom.modalHarmonicsSlider.value = dom.harmonicsSlider.value;
                 dom.modalHarmonicsValue.textContent = dom.harmonicsSlider.value;
+                // MODIFICATION: resize modal canvas before drawing
+                resizeResponsiveCanvases();
                 drawAutoScalePlot(lastReconData);
                 dom.autoScaleModal.style.display = 'flex';
             });
@@ -233,6 +286,27 @@
             dom.presetTriangle.addEventListener('click', () => setupPreset('triangle'));
             dom.presetSawtooth.addEventListener('click', () => setupPreset('sawtooth'));
 
+            // MODIFICATION: Function to resize canvases that should be responsive
+            function resizeResponsiveCanvases() {
+                // Set spectrum canvas drawing resolution to its display size
+                const spectrumRect = dom.spectrumCanvas.getBoundingClientRect();
+                dom.spectrumCanvas.width = spectrumRect.width;
+
+                // Set auto-scale canvas drawing resolution to its display size
+                const autoScaleRect = dom.autoScaleCanvas.getBoundingClientRect();
+                if (autoScaleRect.width > 0) { // Only resize if visible
+                    dom.autoScaleCanvas.width = autoScaleRect.width;
+                }
+                
+                // Redraw everything after resizing
+                drawAll();
+            }
+
+            // MODIFICATION: Add resize listener for window
+            window.addEventListener('resize', resizeResponsiveCanvases);
+
+            // MODIFICATION: Call initial resize and clear
+            resizeResponsiveCanvases();
             clearAll();
         });
     </script>
