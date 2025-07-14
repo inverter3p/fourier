@@ -40,10 +40,32 @@
 
         /* MODIFICATION: Make modal responsive */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
-        .modal-content { background-color: #252526; padding: 20px; border: 1px solid #3e3e42; border-radius: 8px; width: 95%; max-width: 840px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; position: relative; }
+        .modal-content { 
+        background-color: #252526; 
+        padding: 20px; 
+        border: 1px solid #3e3e42; 
+        border-radius: 8px; 
+        width: 95%; 
+        max-width: 840px; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5); 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        position: relative; 
+        max-height: 70vh; /* ADD THIS LINE - Limits height to 90% of the viewport height */
+        overflow-y: auto;   /* ADD THIS LINE - Adds scrollbar if content overflows */
+    }
         .close-button { color: #aaaaaa; position: absolute; top: 5px; right: 15px; font-size: 28px; font-weight: bold; }
         .close-button:hover, .close-button:focus { color: #fff; text-decoration: none; cursor: pointer; }
-        #autoScaleCanvas { background-color: #0c0c0c; border: 1px solid #3e3e42; border-radius: 4px; margin-top: 10px; width: 100%; height: auto; }
+        #autoScaleCanvas { 
+        background-color: #0c0c0c; 
+        border: 1px solid #3e3e42; 
+        border-radius: 4px; 
+        margin-top: 10px; 
+        width: 100%; 
+        height: auto;
+        max-height: 500px; /* ADD THIS LINE - Prevents the canvas itself from getting excessively tall */
+    }
         .modal-content .slider-group { padding: 10px 20px; box-sizing: border-box; }
     </style>
 </head>
