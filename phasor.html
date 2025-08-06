@@ -264,7 +264,9 @@
                 const graphHeight = height - padding.top - padding.bottom;
                 const midY = padding.top + graphHeight / 2;
                 
-                const max_amplitude = Math.max(v_peak, i_peak, 10);
+                // **FIX:** Set Y-axis scale based on the maximum possible slider value, not the current value.
+                // This makes the axis static, showing the true change in amplitude.
+                const max_amplitude = Math.max(parseFloat(sliders.vp.max), parseFloat(sliders.ip.max));
                 const scaleY = (graphHeight / 2) * 0.9 / max_amplitude;
 
                 w_ctx.clearRect(0, 0, width, height);
