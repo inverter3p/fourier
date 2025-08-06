@@ -237,11 +237,11 @@
                 const i_imag_sign = params.i_imag >= 0 ? '+' : '-';
                 outputs.i_phasor.innerHTML = `<b>Polar:</b> ${params.i_rms.toFixed(2)} &ang;${params.i_phase_deg.toFixed(1)}° A<br><b>Rect:</b> ${params.i_real.toFixed(2)} ${i_imag_sign} j${Math.abs(params.i_imag).toFixed(2)} A`;
 
-                // Generate KaTeX strings with phase as fraction of pi
+                // Generate KaTeX strings with phase as fraction of pi, using COSINE
                 const v_phase_pi_frac = getPiFraction(params.v_phase_deg);
                 const i_phase_pi_frac = getPiFraction(params.i_phase_deg);
-                const v_eq_str = `v(t) = ${params.v_peak.toFixed(1)}\\sin(${params.w.toFixed(0)}t ${v_phase_pi_frac})`;
-                const i_eq_str = `i(t) = ${params.i_peak.toFixed(1)}\\sin(${params.w.toFixed(0)}t ${i_phase_pi_frac})`;
+                const v_eq_str = `v(t) = ${params.v_peak.toFixed(1)}\\cos(${params.w.toFixed(0)}t ${v_phase_pi_frac})`;
+                const i_eq_str = `i(t) = ${params.i_peak.toFixed(1)}\\cos(${params.w.toFixed(0)}t ${i_phase_pi_frac})`;
                 
                 if (window.katex) {
                     katex.render(v_eq_str, outputs.v_eq, { throwOnError: false });
@@ -308,29 +308,29 @@
                 }
                 w_ctx.fillText("Time (s)", padding.left + graphWidth / 2, height - 5);
 
-                // --- Plot Waveforms ---
+                // --- Plot Waveforms using COSINE ---
                 const time_per_pixel = time_total / graphWidth;
                 w_ctx.beginPath(); w_ctx.strokeStyle = '#2563eb'; w_ctx.lineWidth = 2.5;
                 for (let i = 0; i < graphWidth; i++) {
                     const t = i * time_per_pixel;
-                    const y = midY - scaleY * v_peak * Math.sin(w * t + v_phase_rad);
+                    const y = midY - scaleY * v_peak * Math.cos(w * t + v_phase_rad);
                     if (i === 0) w_ctx.moveTo(padding.left + i, y); else w_ctx.lineTo(padding.left + i, y);
                 }
                 w_ctx.stroke();
                 w_ctx.beginPath(); w_ctx.strokeStyle = '#dc2626'; w_ctx.lineWidth = 2.5;
                 for (let i = 0; i < graphWidth; i++) {
                     const t = i * time_per_pixel;
-                    const y = midY - scaleY * i_peak * Math.sin(w * t + i_phase_rad);
+                    const y = midY - scaleY * i_peak * Math.cos(w * t + i_phase_rad);
                     if (i === 0) w_ctx.moveTo(padding.left + i, y); else w_ctx.lineTo(padding.left + i, y);
                 }
                 w_ctx.stroke();
 
-                // --- Draw Tooltip ---
+                // --- Draw Tooltip using COSINE ---
                 if (mousePos && mousePos.x > padding.left && mousePos.x < width - padding.right) {
                     const x = mousePos.x;
                     const t = (x - padding.left) * time_per_pixel;
-                    const v_inst = v_peak * Math.sin(w * t + v_phase_rad);
-                    const i_inst = i_peak * Math.sin(w * t + i_phase_rad);
+                    const v_inst = v_peak * Math.cos(w * t + v_phase_rad);
+                    const i_inst = i_peak * Math.cos(w * t + i_phase_rad);
                     const v_y = midY - scaleY * v_inst;
                     const i_y = midY - scaleY * i_inst;
 
